@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MQTT Light Control</title>
+  <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    button {
+      padding: 10px 20px;
+      font-size: 18px;
+      margin: 10px;
+      cursor: pointer;
+    }
+
+    #status {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Light Control via MQTT</h1>
+  <button onclick="sendMessage('ON')" style="background: green; color: white;">Turn ON</button>
+  <button onclick="sendMessage('OFF')" style="background: red; color: white;">Turn OFF</button>
+  <p id="status">Status: Waiting for command...</p>
+
+  <script>
+    const client = mqtt.connect('wss://ead179878cd642a5a149c5dc17034e35.s1.eu.hivemq.cloud:8884/mqtt', {
+      username: 'nelsonprox92', // Add your username here
+      password: '#Nelprox92', // Add your password here
+      rejectUnauthorized: false
+    });
+
+    const topic = "/student_group/light_control";
+
+    client.on("connect", () => {
+      console.log("Connected to MQTT broker");
+      document.getElementById("status").innerText = "Status: Connected to broker";
+    });
+
+    client.on("error", (error) => {
+      console.error("Connection error: ", error);
+      document.getElementById("status").innerText = "Status: Connection error";
+    });
+
+    function sendMessage(command) {
+      console.log("Publishing message: " + command);
+      client.publish(topic, command, (error) => {
+        if (error) {
+          console.error("Publish error: ", error);
+          document.getElementById("status").innerText = "Status: Publish error";
+        } else {
+          document.getElementById("status").innerText = "Status: " + command;
+          console.log("Message sent: " + command);
+        }
+      });
+    }
+
+    client.on("disconnect", () => {
+      console.log("Disconnected from MQTT broker");
+      document.getElementById("status").innerText = "Status: Disconnected from broker";
+    });
+  </script>
+</body>
+
+</html>
